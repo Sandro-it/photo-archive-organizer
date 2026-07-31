@@ -61,8 +61,8 @@ class SortTab(QWidget):
 
         opt_layout.addWidget(QLabel("Структура:"))
         self.grouping_combo = QComboBox()
-        self.grouping_combo.addItem("Рік / День_Місяць_Рік_label", GroupingTemplate.YEAR_DATE)
-        self.grouping_combo.addItem("Рік / Місяць / День_Місяць_Рік_label", GroupingTemplate.YEAR_MONTH_DATE)
+        self.grouping_combo.addItem("Рік / Місяць_День_Місяць_Рік_label", GroupingTemplate.YEAR_DATE)
+        self.grouping_combo.addItem("Рік / Місяць / Місяць_День_Місяць_Рік_label", GroupingTemplate.YEAR_MONTH_DATE)
         self.grouping_combo.addItem("Тільки Рік / label", GroupingTemplate.YEAR_ONLY)
         opt_layout.addWidget(self.grouping_combo)
 
