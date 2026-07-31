@@ -23,8 +23,8 @@ from .dater import resolve_date
 
 class GroupingTemplate(Enum):
     YEAR_ONLY = "year_only"                 # DEST/2022/label
-    YEAR_DATE = "year_date"                 # DEST/2022/15_06_2022_label
-    YEAR_MONTH_DATE = "year_month_date"     # DEST/2022/06/15_06_2022_label
+    YEAR_DATE = "year_date"                 # DEST/2022/06_15_06_2022_label (за замовчуванням)
+    YEAR_MONTH_DATE = "year_month_date"     # DEST/2022/06/06_15_06_2022_label
 
 
 class FileAction(Enum):
@@ -60,17 +60,22 @@ class PlannedMove:
 
 
 def build_dest_path(cfg: SortConfig, date: datetime | None) -> Path:
+    """Формат назви папки — ММ_ДД_ММ_РРРР_label (місяць повторюється спереду,
+    щоб файловий менеджер сортував за місяцем, як і вже перейменовані папки
+    в core/renamer.py). Наприклад, рік=2025, місяць=03, день=15 -> папка
+    "03_15_03_2025_unsorted", яка за GroupingTemplate.YEAR_DATE (типово)
+    лежить одразу в DEST/2025/, без проміжної папки-місяця."""
     if date is None:
         return cfg.dest_root / cfg.unresolved_label
 
     year_folder = cfg.dest_root / str(date.year)
-    event_name = f"{date.day:02d}_{date.month:02d}_{date.year}_{cfg.event_label}"
+    event_name = f"{date.month:02d}_{date.day:02d}_{date.month:02d}_{date.year}_{cfg.event_label}"
 
     if cfg.grouping == GroupingTemplate.YEAR_ONLY:
         return year_folder
     if cfg.grouping == GroupingTemplate.YEAR_MONTH_DATE:
         return year_folder / f"{date.month:02d}" / event_name
-    return year_folder / event_name  # YEAR_DATE (за замовчуванням)
+    return year_folder / event_name  # YEAR_DATE (за замовчуванням, без проміжної папки-місяця)
 
 
 def _resolve_conflict(dest_file: Path, policy: ConflictPolicy) -> Path | None:
