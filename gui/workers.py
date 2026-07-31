@@ -9,6 +9,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from core.scanner import collect_files
 from core.sorter import plan_sort, execute_sort, SortConfig, PlannedMove
 from core.renamer import plan_rename, execute_rename, RenameRule
+from core.duplicates import find_all_duplicates, DEFAULT_MAX_HAMMING_DISTANCE
 
 
 class PlanSortWorker(QThread):
@@ -65,5 +66,25 @@ class PlanRenameWorker(QThread):
         try:
             plan = plan_rename(self.rule, self.folders)
             self.finished_plan.emit(plan)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
+class FindDuplicatesWorker(QThread):
+    """Порівняння sha256/phash по вже побудованому індексу — може бути
+    повільним на великих архівах (O(n^2) для similar), тому в окремому потоці."""
+
+    finished_groups = pyqtSignal(dict)   # {'exact': [DuplicateGroup], 'similar': [DuplicateGroup]}
+    error = pyqtSignal(str)
+
+    def __init__(self, index_db_path: Path, max_distance: int = DEFAULT_MAX_HAMMING_DISTANCE):
+        super().__init__()
+        self.index_db_path = index_db_path
+        self.max_distance = max_distance
+
+    def run(self):
+        try:
+            groups = find_all_duplicates(self.index_db_path, max_distance=self.max_distance)
+            self.finished_groups.emit(groups)
         except Exception as e:
             self.error.emit(str(e))

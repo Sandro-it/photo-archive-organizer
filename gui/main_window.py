@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel
+from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
 from gui.sort_tab import SortTab
 from gui.rename_tab import RenameTab
+from gui.duplicates_tab import DuplicatesTab
 
 
 class MainWindow(QMainWindow):
@@ -13,9 +14,6 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         tabs.addTab(SortTab(), "Сортування фото")
         tabs.addTab(RenameTab(), "Перейменування папок")
-
-        placeholder = QLabel("Модуль пошуку дублікатів — наступний етап розробки.")
-        placeholder.setContentsMargins(20, 20, 20, 20)
-        tabs.addTab(placeholder, "Пошук дублікатів (скоро)")
+        tabs.addTab(DuplicatesTab(), "Пошук дублікатів")
 
         self.setCentralWidget(tabs)
